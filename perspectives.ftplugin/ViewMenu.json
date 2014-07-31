@@ -211,8 +211,34 @@
 			]
 
 		},
+
+		"Taskpaper Started": {
+			"title": "Starting in the Next 7 Days",
+			"for": "$item in //@start <= {today + 7d} except //@done",
+			"let": "$day = fn:daypart($item@start)",
+			"groupby": "$day",
+			"orderby": "$day",
+			"return": [
+				"{$day}:",
+				{
+					"for": "$i in $item",
+					"let": "$project = $item@parent",
+					"groupby": "$project",
+					"return": [
+						"\t{$project}:",
+						{
+							"for": "$j in $i",
+							"return": "\t\t- {$j} {$j@tags} ",
+						},
+						""
+					]
+				},
+				""
+			]
+
+		},
 		"Next Actions with Link": {
-			"title": "# Next Actions",
+			"title": "\n# Next Actions",
 			"for": "$item in //@next",
 			"let": "$project = $item@parent", 
 			"orderby": "$project",
@@ -221,7 +247,22 @@
 				"## {$project}.todo",
 				{
 					"for": "$i in $item",
-					"return": "- {$i} :: [Link]({$i@url}) {$i@tags} \n {i@child}",
+					"return": "- {$i} :: [Link]({$i@url}) {$i@tags}",
+				},
+				""
+			]
+		},
+		"Taskpaper Next Actions": {
+			"title": "\nNext Actions:",
+			"for": "$item in //@next",
+			"let": "$project = $item@parent", 
+			"orderby": "$project",
+			"groupby": "$project",
+			"return": [
+				"\t{$project}:",
+				{
+					"for": "$i in $item",
+					"return": "\t\t- {$i} {$i@tags}",
 				},
 				""
 			]

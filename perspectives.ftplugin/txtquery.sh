@@ -9,7 +9,7 @@ Ver="0.24"
 DEPENDENCIES="TXTQuery.js, https://www.npmjs.org/package/foldingtext"
 
 # EDIT THIS LINE TO MATCH THE PATH OF The FoldingText CLI executable FT ON YOUR INSTALLATION
-PathToFT=/usr/local/lib/node_modules/foldingtext/bin/ft
+PathToFT=/usr/local/lib/node_modules/npm/node_modules/foldingtext/bin/ft
 # ( install from https://www.npmjs.org/package/foldingtext )
 
 HelpString="NAME
@@ -127,7 +127,7 @@ MENUFILE="ViewMenu.json"
 # 4. the following script defaults are used as the last resort:
 
 # INPUTS
-DEFAULTCOLLECTION="~/Library/Application Support/Notational Velocity/project*"
+DEFAULTCOLLECTION="~/Dropbox/WriteUp/Projects*"
 DEFAULTDOC="~/Library/Application Support/Notational Velocity/inbox.txt"
 DEFAULT_LASTMOD="30d" # only query files modified in last 30 days N[smhdw]
 DEFAULT_IN_TYPES="txt,md,ft" #use comma-delimited list, no spaces
