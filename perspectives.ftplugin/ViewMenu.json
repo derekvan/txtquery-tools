@@ -186,6 +186,21 @@
 				""
 			]
 		},
+		"Ongoing Started": {
+			"title": "# Ongoing",
+			"for": "$item in //@start < {today} except //@done",
+			"let": "$project = $item@parent, $started = fn:daypart($item@start)", 
+			"orderby": "$project",
+			"groupby": "$project",
+			"return": [
+				"## {$project}.todo",
+				{
+					"for": "$i in $item",
+					"return": "- {$started} :: {$i} :: [Link]({$i@url}) {$i@tags}",
+				},
+				""
+			]
+		},
 		"Started (with ftdoc:// links)": {
 			"title": "# Starting in the Next 7 Days",
 			"for": "$item in //@start <= {today + 7d} except //@done",
