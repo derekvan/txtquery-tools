@@ -1,6 +1,6 @@
 {
 	"sources": {
-		"collections": "~/Library/Application Support/Notational Velocity/project*",
+		"collections": "~/Dropbox/WriteUp/Projects/*",
 		"docs": "~/Library/Application Support/Notational Velocity/inbox.txt",
 		"filetypes": "txt,md,ft",
 		"switches": "-maxdepth 1",
@@ -71,17 +71,6 @@
 			]
 		},
 		"Grouped by tag": {
-			"sources": {
-				"collections": "~/Library/Application Support/Notational Velocity/project*",
-				"docs": "~/Library/Application Support/Notational Velocity/inbox.txt",
-				"filetypes": [
-					"txt",
-					"md",
-					"ft"
-				],
-				"mtime": "42d",
-				"switches": "-maxdepth 1"
-			},
 			"for": "$tag in fn:tagSet()",
 			"let": "$items = //@{$tag}",
 			"orderby": "$tag",
@@ -193,6 +182,102 @@
 					"for": "$i in $item",
 					"orderby": "$i@due",
 					"return": "- fn:timepart({$i@due}) [{$i}]({$i@url})"
+				},
+				""
+			]
+		},
+		"Ongoing Started": {
+			"title": "# Ongoing",
+			"for": "$item in //@start < {today} except //@done",
+			"let": "$project = $item@parent, $started = fn:daypart($item@start)", 
+			"orderby": "$project",
+			"groupby": "$project",
+			"return": [
+				"## {$project}.todo",
+				{
+					"for": "$i in $item",
+					"return": "- {$started} :: {$i} :: [Link]({$i@url}) {$i@tags}",
+				},
+				""
+			]
+		},
+		"Started (with ftdoc:// links)": {
+			"title": "# Starting in the Next 7 Days",
+			"for": "$item in //@start <= {today + 7d} except //@done",
+			"let": "$day = fn:daypart($item@start)",
+			"groupby": "$day",
+			"orderby": "$day",
+			"return": [
+				"## {$day}",
+				{
+					"for": "$i in $item",
+					"let": "$project = $item@parent",
+					"groupby": "$project",
+					"return": [
+						"### {$project}.todo",
+						{
+							"for": "$j in $i",
+							"return": "- {$j} :: [Link]({$j@url}) {$j@tags}",
+						},
+						""
+					]
+				},
+				""
+			]
+
+		},
+
+		"Taskpaper Started": {
+			"title": "Starting in the Next 7 Days",
+			"for": "$item in //@start <= {today + 7d} except //@done",
+			"let": "$day = fn:daypart($item@start)",
+			"groupby": "$day",
+			"orderby": "$day",
+			"return": [
+				"{$day}:",
+				{
+					"for": "$i in $item",
+					"let": "$project = $item@parent",
+					"groupby": "$project",
+					"return": [
+						"\t{$project}:",
+						{
+							"for": "$j in $i",
+							"return": "\t\t- {$j} {$j@tags} ",
+						},
+						""
+					]
+				},
+				""
+			]
+
+		},
+		"Next Actions with Link": {
+			"title": "\n# Next Actions",
+			"for": "$item in //@next",
+			"let": "$project = $item@parent", 
+			"orderby": "$project",
+			"groupby": "$project",
+			"return": [
+				"## {$project}.todo",
+				{
+					"for": "$i in $item",
+					"return": "- {$i} :: [Link]({$i@url}) {$i@tags}",
+				},
+				""
+			]
+		},
+		"Taskpaper Next Actions": {
+			"title": "\nNext Actions:",
+			"for": "$item in //@next",
+			"let": "$project = $item@parent", 
+			"orderby": "$project",
+			"groupby": "$project",
+			"return": [
+				"\t{$project}:",
+				{
+					"for": "$i in $item",
+					"return": "\t\t- {$i} {$i@tags}",
 				},
 				""
 			]
