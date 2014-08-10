@@ -196,14 +196,14 @@
 				"## {$project}.todo",
 				{
 					"for": "$i in $item",
-					"return": "- {$started} :: {$i} :: [Link]({$i@url}) {$i@tags}",
+					"return": "- {$started} :: {$i} :: [↗️]({$i@url}) {$i@tags}",
 				},
 				""
 			]
 		},
 		"Started (with ftdoc:// links)": {
 			"title": "# Starting in the Next 7 Days",
-			"for": "$item in //@start <= {today + 7d} except //@done",
+			"for": "$item in //@start <= {today + 2d} except //@done",
 			"let": "$day = fn:daypart($item@start)",
 			"groupby": "$day",
 			"orderby": "$day",
@@ -217,7 +217,7 @@
 						"### {$project}.todo",
 						{
 							"for": "$j in $i",
-							"return": "- {$j} :: [Link]({$j@url}) {$j@tags}",
+							"return": "- {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}",
 						},
 						""
 					]
@@ -229,7 +229,7 @@
 
 		"Taskpaper Started": {
 			"title": "Starting in the Next 7 Days",
-			"for": "$item in //@start <= {today + 7d} except //@done",
+			"for": "$item in //@start <= {today + 2d} except //@done",
 			"let": "$day = fn:daypart($item@start)",
 			"groupby": "$day",
 			"orderby": "$day",
@@ -243,7 +243,7 @@
 						"\t{$project}:",
 						{
 							"for": "$j in $i",
-							"return": "\t\t- {$j} {$j@tags} ",
+							"return": "\t\t- {$j} {$j@tags} {$j@note}",
 						},
 						""
 					]
@@ -262,7 +262,7 @@
 				"## {$project}.todo",
 				{
 					"for": "$i in $item",
-					"return": "- {$i} :: [Link]({$i@url}) {$i@tags}",
+					"return": "- {$i} :: [↗️]({$i@url}) {$i@tags} {$i@note}",
 				},
 				""
 			]
@@ -277,7 +277,7 @@
 				"\t{$project}:",
 				{
 					"for": "$i in $item",
-					"return": "\t\t- {$i} {$i@tags}",
+					"return": "\t\t- {$i} {$i@tags} {$i@note}",
 				},
 				""
 			]
