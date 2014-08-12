@@ -254,7 +254,7 @@
 		},
 		"Next Actions with Link": {
 			"title": "\n# Next Actions",
-			"for": "$item in //@next",
+			"for": "$item in //@next except //@done",
 			"let": "$project = $item@parent", 
 			"orderby": "$project",
 			"groupby": "$project",
@@ -269,7 +269,7 @@
 		},
 		"Taskpaper Next Actions": {
 			"title": "\nNext Actions:",
-			"for": "$item in //@next",
+			"for": "$item in //@next except //@done",
 			"let": "$project = $item@parent", 
 			"orderby": "$project",
 			"groupby": "$project",
