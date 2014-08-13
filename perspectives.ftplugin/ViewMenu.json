@@ -259,11 +259,18 @@
 			"groupby": "$project",
 			"orderby": "$project",
 			"return": [
-				"## {$project}.todo",
-				{
+				"## {$project}",
+					{
 						"for": "$i in $item",
+						"let": "$proj = $i@parent",
+						"groupby": "$proj",
 						"return": [
-							"- {$i} :: **{$i@parent}** :: [↗️]({$i@url}) {$i@tags} {$i@note}"
+							"**{$proj}**.todo",
+							{
+								"for": "$j in $i",
+								"return": "- {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}"
+							},
+							""
 						]
 					},
 					""
