@@ -196,7 +196,7 @@
 				"## {$project}.todo",
 				{
 					"for": "$i in $item",
-					"return": "- {$started} :: {$i} :: [↗️]({$i@url}) {$i@tags}",
+					"return": "- {$started} :: {$i} :: [↗️]({$i@url}) {$i@tags}"
 				},
 				""
 			]
@@ -217,7 +217,7 @@
 						"### {$project}.todo",
 						{
 							"for": "$j in $i",
-							"return": "- {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}",
+							"return": "- {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}"
 						},
 						""
 					]
@@ -243,7 +243,7 @@
 						"\t{$project}:",
 						{
 							"for": "$j in $i",
-							"return": "\t\t- {$j} {$j@tags} {$j@note}",
+							"return": "\t\t- {$j} {$j@tags} {$j@note}"
 						},
 						""
 					]
@@ -279,7 +279,7 @@
 				"\t{$project}:",
 				{
 					"for": "$i in $item",
-					"return": "\t\t- {$i} {$i@tags} {$i@note}",
+					"return": "\t\t- {$i} {$i@tags} {$i@note}"
 				},
 				""
 			]
