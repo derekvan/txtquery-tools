@@ -252,20 +252,22 @@
 			]
 
 		},
-		"Next Actions with Link": {
-			"title": "\n# Next Actions",
-			"for": "$item in //@next except //@done",
-			"let": "$project = $item@parent", 
-			"orderby": "$project",
+		"Next Actions with Link":{
+			"title":"\n# Next Actions",
+			"for": "$item in //@next and not @done",
+			"let": "$project = $item@file",
 			"groupby": "$project",
+			"orderby": "$project",
 			"return": [
 				"## {$project}.todo",
 				{
-					"for": "$i in $item",
-					"return": "- {$i} :: [↗️]({$i@url}) {$i@tags} {$i@note}",
-				},
-				""
-			]
+						"for": "$i in $item",
+						"return": [
+							"- {$i} :: **{$i@parent}** :: [↗️]({$i@url}) {$i@tags} {$i@note}"
+						]
+					},
+					""
+				]
 		},
 		"Taskpaper Next Actions": {
 			"title": "\nNext Actions:",
