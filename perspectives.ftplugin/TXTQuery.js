@@ -2,10 +2,10 @@
 //FoldingText is Copyright Jesse Grosjean at HogBay Software
 
 // Also includes some date-formatting functions from:
-//	 * Date Format 1.2.3
-//	 * (c) 2007-2009 Steven Levithan <stevenlevithan.com>
-//	 * MIT license
-//	(See further down)
+//  * Date Format 1.2.3
+//  * (c) 2007-2009 Steven Levithan <stevenlevithan.com>
+//  * MIT license
+// (See further down)
 
 // Version 0.4
 
@@ -211,7 +211,7 @@ function TextQuery(tree) {
 			"groupby": "$day",
 			"orderby": "$day",
 			"return": [
-				"### fn:format_date({$day}, [FNn] [D] [MNn] [Y])",
+				"### fn:format_date({$day}, '[FNn] [D] [MNn] [Y]'')",
 				{
 					"for": "$i in $item",
 					"orderby": "$i@due",
@@ -336,14 +336,21 @@ function TextQuery(tree) {
 
 	dctViewFn = {
 		"format_date":function format_date(varArg) {
-			var varDate, strDate, strMask;
+			var varDate, strDate, strMask, strArg;
 			if (varArg instanceof Array) {
 				if (varArg.length > 1) {
 					strDate = varArg[0];
 					if (!oSmallTime) oSmallTime = new SmallTime();
 					varDate = oSmallTime.readDatePhrase(strDate);
 					if (! isNaN(varDate)) {
-						strMask = xQueryPicToDateJSMask(varArg[1]);
+						if (varArg.length > 2) {
+							strArg = '[' + varArg.slice(1).join('] [') + ']';
+						} else {
+							strArg=varArg[1];
+						}
+						strMask = xQueryPicToDateJSMask(strArg);
+
+
 						strDate = varDate.format(strMask);
 					}
 				}
@@ -633,7 +640,7 @@ function TextQuery(tree) {
 				strLiteral=lstParts[1];
 				if (strLiteral) strSubMask += ('\'' + strLiteral + '\'');
 				lstPic.push(strSubMask );
-			}
+			} else lstPic.push(('\'' + lstParts[0] + '\''));
 		});
 		return lstPic.join('');
 	}
@@ -1309,7 +1316,11 @@ function TextQuery(tree) {
 		} else {
 			fnPrimer = function(a) {
 				if (a) {
-					return a.toUpperCase();
+					if (isNaN(a)) {
+						return a.toUpperCase();
+					} else {
+						return a;
+					}
 				} else {
 					return cEmptyValue;
 				}
@@ -1382,7 +1393,7 @@ function TextQuery(tree) {
 
 	//evaluate a string or FLWOR dictionary in a FLWOR line return list
 	function makeLine(varLine, dctNames) {
-		var strType = typeof(varLine), strExpanded, strLines;
+		var strType = typeof(varLine), strExpanded, strLines='';
 
 		if (strType == "string") {
 			if (varLine.indexOf(DOLLAR) !== -1) {
@@ -1390,7 +1401,9 @@ function TextQuery(tree) {
 			} else {
 				strExpanded = varLine;
 			}
-			if (strExpanded && (strExpanded !== "")) {
+			if (strExpanded) {
+				// loop through { phrase } pairs translating
+				// date expressions
 				if (strExpanded.indexOf("{") !== -1) {
 					if (! oSmallTime) oSmallTime = new SmallTime();
 					strExpanded = oSmallTime.translatePathDates(strExpanded);
@@ -1548,6 +1561,7 @@ function TextQuery(tree) {
 		case "line":
 			strValue = oNode.line();
 			break;
+		case "project":
 		case "heading":
 			strType = varNode.type();
 			while (lstEnvelope.indexOf(strType) == -1) {
@@ -1558,6 +1572,9 @@ function TextQuery(tree) {
 			break;
 		case "parent":
 			strValue = oNode.parent.text();
+			break;
+		case "parentid":
+			strValue = oNode.parent.id;
 			break;
 		case "level":
 			while (varNode.parent) {
@@ -1698,7 +1715,7 @@ function TextQuery(tree) {
 				}
 			} else {
 				if (strArg) {
-					varArg=[]; // split on commas except between quotes
+					varArg=[]; // split on commas except between '',[]
 					lstParts=strArg.trim().split(/\s*\'\s*/);
 					lngParts = lstParts.length;
 					for (i=0; i<lngParts; i+=1) {
@@ -1717,6 +1734,7 @@ function TextQuery(tree) {
 				} else varArg = [];
 			}
 
+
 			if (typeof(fn) !== "function") {
 				strFull = strFull.replace(
 					strMatch, strMatch +"=UNKNOWN FUNCTION", "g");
@@ -1728,6 +1746,7 @@ function TextQuery(tree) {
 		}
 		return strFull;
 	}
+
 
 	//Can be a string expansion,
 	//or getting a reference to an object,
@@ -1771,7 +1790,7 @@ function TextQuery(tree) {
 
 				} else {
 					varValue = dctNames[strLabel];
-					if (varValue !== undefined) {
+					if (varValue) {
 						strType = typeof varValue;
 
 						if (strType !== "string") {
@@ -1798,8 +1817,7 @@ function TextQuery(tree) {
 							strMatch, getAttrib(varValue, strAttrib), "gi");
 
 					} else {
-						strLine = strLine.replace(strMatch,
-							strLabel + "=UNDEFINED LABEL");
+						strLine = strLine.replace(strMatch, "", "gi");
 					}
 				}
 				oMatch = rgxLabel.exec(strLine);
@@ -1827,7 +1845,7 @@ function TextQuery(tree) {
 			strView = "";
 
 		if (dctView !== undefined) {
-			varTitle = dctView.title;
+			varTitle = dctView['title'];
 			if (varTitle) {
 				strView += (varTitle + "\n\n");
 			} else {
@@ -1902,6 +1920,20 @@ function TextQuery(tree) {
 		return strViewJSON;
 	};
 
+	this.testQuery=function(_, varFLWOR, lstFileSet) {
+		var dctFLWOR;
+
+		lstPackList=lstFileSet;
+		prepareSourceList();
+
+		if (typeof varFLWOR !== 'string') {
+			dctFLWOR=varFLWOR;
+		} else {
+			dctFLWOR= JSON.parse(varFLWOR);
+		}
+		return buildView(dctFLWOR, "Test query");
+	};
+
 	this.customViewByName=function(_, dctOptions, dctFLWOR) {
 		//options.viewname, options.packlist,
 		//options.frontmatter, options.sourcespec
@@ -1926,7 +1958,7 @@ function TextQuery(tree) {
 				strHTMLComment =
 					htmlComment(dctView, strViewName,
 						dctOptions['sourcespec']);
-				strHTMLCloseTag = "<!-- REPORT OUTPUT ENDS -->";
+				strHTMLCloseTag = "<!-- REPORT OUTPUT ENDS -->\n";
 			}
 			strReport = buildView(dctView, strViewName);
 			return strHTMLComment + strReport + strHTMLCloseTag;
@@ -1940,12 +1972,91 @@ function TextQuery(tree) {
 
 function SmallTime() {
 		// preprocess a nodePath to translate curly-bracketed date phrases to ISO
-	this.translatePathDates = function (strPath) {
-		var strDblQuote = String.fromCharCode(34);
-		return strPath.replace(
-			/{[^}]+}/g, strDblQuote +
-				datePhraseToISO(strPath) + strDblQuote);
+	var dctEmoji = {
+		"seedling":"🌱",
+		"alarmclock":"⏰",
+		"watch":"⌚",
+		"hourglass":"⏳",
+		"bellcancelled":"🔕",
+		"bell":"🔔",
+		"cjkday":"日",
+		"cjkmonth":"月️",
+		"cjkweek":"周",
+		"{clock}":"❓", // fallback if dateless
+		"{moon}":"️🍌" // ditto
 	};
+
+	function timeEmoji(strKey, varDate) {
+		var dte, strChar="", varValue;
+		if (varDate) {
+			if (varDate instanceof Date) dte=varDate;
+			else dte=phraseToDate(varDate);
+			if (dte) {
+				if (strKey.indexOf('{moon}') !== -1) strChar+=emoMoon(dte);
+				if (strKey.indexOf('{clock}') !== -1) strChar+=emoTime(dte);
+			}
+		} else {
+			varValue=dctEmoji[strKey];
+			if (varValue) strChar=varValue;
+		}
+		if (!strChar) strChar=strKey;
+		return strChar;
+	}
+	// Emoji clockface to nearest preceding half hour, commented at:
+	// https://github.com/RobTrew/txtquery-tools/tree/master/utilities
+	function emoTime(e){
+		var t=128335,n=e.getHours()%12,r=e.getMinutes(),i,s;
+		if(n)i=t+n;else i=t+12;if(r>=30)s=i+12;else s=i;
+		return asUnicode(s);
+	}
+
+	// Emoji moonphase to nearest 1/, , commented at:
+	// https://github.com/RobTrew/txtquery-tools/tree/master/utilities
+	function emoMoon(e){
+		var t=new Date(Date.UTC(1970,0,7,20,37)),n=2551442.8,
+				r=(e.getTime()-t.getTime())/1e3,i=r%n,s=i/n*8;
+		return asUnicode(127761+Math.round(s)%8);
+	}
+
+	function asUnicode(e){
+		var t=e-65536;
+		return String.fromCharCode((t>>10)+55296)+
+			String.fromCharCode((t&1023)+56320);
+	}
+
+		// preprocess a nodePath to translate curly-bracketed date phrases to ISO
+	this.translatePathDates = function (strPath) {
+		var strDblQuote = String.fromCharCode(34),
+			strExpand=strPath,
+			rgxBracketed = /{[^{}]+}/, oMatch, strMatch, strDate;
+
+		oMatch=rgxBracketed.exec(strExpand);
+		while (oMatch) {
+			strMatch = oMatch[0];
+			strDate = datePhraseToISO(strMatch);
+			strExpand = strExpand.replace(
+					strMatch, strDblQuote + strDate + strDblQuote, "g");
+			oMatch=rgxBracketed.exec(strExpand);
+		}
+		return strExpand;
+	};
+
+		// preprocess a nodePath to translate curly-bracketed date phrases to ISO
+	// function translatePathDates(strPath) {
+	//	var strDblQuote = String.fromCharCode(34),
+	//		strExpand=strPath,
+	//		rgxBracketed = /{[^{}]+}/, oMatch, strMatch, strDate;
+
+	//	oMatch=rgxBracketed.exec(strExpand);
+	//	while (oMatch) {
+	//		strMatch = oMatch[0];
+	//		strDate = datePhraseToISO(strMatch);
+	//		strExpand = strExpand.replace(
+	//				strMatch, strDblQuote + strDate + strDblQuote, "g");
+	//		oMatch=rgxBracketed.exec(strExpand);
+	//	}
+	//	return strExpand;
+	// }
 
 	this.readDatePhrase = function(strPhrase, iWeekStart) {
 		return phraseToDate(strPhrase, iWeekStart);
@@ -1988,14 +2099,6 @@ function SmallTime() {
 		}
 	}
 
-	// preprocess a nodePath to translate curly-bracketed date phrases to ISO
-	this.translatePathDates = function (strPath) {
-		var strDblQuote = String.fromCharCode(34);
-		return strPath.replace(
-			/{[^}]+}/g, strDblQuote +
-				datePhraseToISO(strPath) + strDblQuote);
-	};
-
 	// if a time specified for today has already passed, assume tomorrow
 	function adjustDay(dteAnchor) {
 		if (dteAnchor < new Date()) {
@@ -2005,7 +2108,7 @@ function SmallTime() {
 		}
 	}
 
-	// informal phrases like "now +7d", "thu", jan 12 2pm" to .js Date()
+	// informal phrases like 'now +7d', 'thu', jan 12 2pm' to .js Date()
 	function phraseToDate(strPhrase, iWeekStart) {
 		if (typeof iWeekStart === "undefined" || iWeekStart === null) {
 			iWeekStart = 1; //Monday
@@ -2033,8 +2136,6 @@ function SmallTime() {
 			lstNth = ["st","nd","rd","th"],
 			dctAnchor = extractISODate(strPhrase),
 			dteAnchor = dctAnchor["date"],
-			lstTokens, //= tokens(dctAnchor['rest']),
-			lngTokens, // = lstTokens.length,
 			rDelta = 0, dteResult = null,
 			lstTokens = tokens(dctAnchor["rest"]),
 			lngTokens = lstTokens.length, blnOrd = false,
@@ -2115,7 +2216,14 @@ function SmallTime() {
 			default:
 				if (strUnit.length >= 3) {
 					if (strUnit in dctMonths) {
-						dteAnchor.setMonth(dctMonths[strUnit]);
+						iMonth=dctMonths[strUnit];
+						dteAnchor.setMonth(iMonth);
+						// if short month hits inherited high day: overflow
+						if (dteAnchor.getMonth() > iMonth) {
+							// set Day to 1 and try again
+							dteAnchor.setDate(1);
+							dteAnchor.setMonth(iMonth);
+						}
 						if (rQuant <= 31) {
 							if (rQuant) {
 								dteAnchor.setDate(rQuant);
@@ -2254,6 +2362,7 @@ function SmallTime() {
 						rQuant = 7 - (iToday - iWkDay);
 					}
 					if (blnNextLast && (iToday !== iWkDay)) {
+						//
 						rQuant += 7 * lngSign; lngSign=1;
 					}
 				} else if (lstSign.indexOf(strTkn) !== -1) {
@@ -2267,7 +2376,7 @@ function SmallTime() {
 					rQuant = 0;
 					blnNewQuant = false; blnNewUnit = true;
 				} else if (strLower in dctShift) {
-					if (dctShift[strLower]) { // unles "ago"
+					if (dctShift[strLower]) { // unless "ago"
 						blnNextLast = blnNewQuant = true; rQuant = 1;
 						if (strTkn !== "next") {lngSign = -1;}
 					} else if (rDelta > 0) { // "ago: reflect around now"
@@ -2356,8 +2465,7 @@ function SmallTime() {
 /// End of SmallTime
 
 	// Create a report
-	var	oReport,
-		options,
+	var	options,
 		varCmd,
 		dctFLWOR;
 
