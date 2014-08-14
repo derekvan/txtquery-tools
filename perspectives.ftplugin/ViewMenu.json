@@ -188,7 +188,7 @@
 		},
 		"Ongoing Started": {
 			"title": "# Ongoing",
-			"for": "$item in //@start < {today} except //@done",
+			"for": "$item in //@start < {today} and not @done",
 			"let": "$project = $item@parent, $started = fn:daypart($item@start)", 
 			"orderby": "$project",
 			"groupby": "$project",
@@ -201,14 +201,29 @@
 				""
 			]
 		},
-		"Started (with ftdoc:// links)": {
-			"title": "# Starting in the Next 7 Days",
-			"for": "$item in //@start <= {today + 2d} except //@done",
+		"Taskpaper Ongoing Started": {
+			"title": "Ongoing:",
+			"for": "$item in //@start < {today} and not @done",
+			"let": "$project = $item@parent, $started = fn:daypart($item@start)", 
+			"orderby": "$project",
+			"groupby": "$project",
+			"return": [
+				"\t{$project}:",
+				{
+					"for": "$i in $item",
+					"return": "\t\t- {$started} :: {$i} {$i@tags}"
+				},
+				""
+			]
+		},
+		"Starting this week": {
+			"title": "\n# Starting",
+			"for": "$item in //(@start >= {today} and @start <= {tomorrow}) and not @done",
 			"let": "$day = fn:daypart($item@start)",
 			"groupby": "$day",
 			"orderby": "$day",
 			"return": [
-				"## {$day}",
+				"## fn:format_date({$day}, '[F,Nn] [MN] [D] [Y]')",
 				{
 					"for": "$i in $item",
 					"let": "$project = $item@parent",
@@ -217,7 +232,7 @@
 						"### {$project}.todo",
 						{
 							"for": "$j in $i",
-							"return": "- {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}"
+							"return": "- fn:timepart({$j@start}) {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}"
 						},
 						""
 					]
@@ -226,24 +241,23 @@
 			]
 
 		},
-
 		"Taskpaper Started": {
-			"title": "Starting in the Next 7 Days",
-			"for": "$item in //@start <= {today + 2d} except //@done",
+			"title": "Starting:",
+			"for": "$item in //(@start >= {today} and @start <= {tomorrow}) and not @done",
 			"let": "$day = fn:daypart($item@start)",
 			"groupby": "$day",
 			"orderby": "$day",
 			"return": [
-				"{$day}:",
+				"\tfn:format_date({$day}, '[F,Nn] [MN] [D] [Y]'):",
 				{
 					"for": "$i in $item",
 					"let": "$project = $item@parent",
 					"groupby": "$project",
 					"return": [
-						"\t{$project}:",
+						"\t\t{$project}:",
 						{
 							"for": "$j in $i",
-							"return": "\t\t- {$j} {$j@tags} {$j@note}"
+							"return": "\t\t\t- {$j} {$j@tags} {$j@note}"
 						},
 						""
 					]
@@ -278,7 +292,7 @@
 		},
 		"Taskpaper Next Actions": {
 			"title": "\nNext Actions:",
-			"for": "$item in //@next except //@done",
+			"for": "$item in //@next and not @done",
 			"let": "$project = $item@parent", 
 			"orderby": "$project",
 			"groupby": "$project",
