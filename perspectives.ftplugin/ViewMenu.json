@@ -292,6 +292,30 @@
 					""
 				]
 		},
+		"Waiting with Link":{
+			"title":"# Waiting",
+			"for": "$item in //@waiting and not @done",
+			"let": "$project = $item@file",
+			"groupby": "$project",
+			"orderby": "$project",
+			"return": [
+				"## fn:substring({$project},4)",
+					{
+						"for": "$i in $item",
+						"let": "$proj = $i@parent",
+						"groupby": "$proj",
+						"return": [
+							"**{$proj}**.todo",
+							{
+								"for": "$j in $i",
+								"return": "- {$j} :: [↗️]({$j@url}) {$j@tags} {$j@note}"
+							},
+							""
+						]
+					},
+					""
+				]
+		},
 		"Taskpaper Next Actions": {
 			"title": "\nNext Actions:",
 			"for": "$item in //@next and not @done",
