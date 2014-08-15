@@ -190,8 +190,8 @@
 			"title": "# Ongoing",
 			"for": "$item in //@start < {today} and not @done",
 			"let": "$project = $item@parent, $started = fn:daypart($item@start)", 
-			"orderby": "$project",
 			"groupby": "$project",
+			"orderby": "$item@file",
 			"return": [
 				"## {$project}.todo",
 				{
@@ -205,8 +205,8 @@
 			"title": "Ongoing:",
 			"for": "$item in //@start < {today} and not @done",
 			"let": "$project = $item@parent, $started = fn:daypart($item@start)", 
-			"orderby": "$project",
 			"groupby": "$project",
+			"orderby": "$item@file",
 			"return": [
 				"\t{$project}:",
 				{
@@ -228,6 +228,7 @@
 					"for": "$i in $item",
 					"let": "$project = $item@parent",
 					"groupby": "$project",
+					"orderby": "$i@file",
 					"return": [
 						"### {$project}.todo",
 						{
@@ -253,6 +254,7 @@
 					"for": "$i in $item",
 					"let": "$project = $item@parent",
 					"groupby": "$project",
+					"orderby": "$i@file",
 					"return": [
 						"\t\t{$project}:",
 						{
