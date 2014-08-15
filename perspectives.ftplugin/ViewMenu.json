@@ -273,7 +273,7 @@
 			"groupby": "$project",
 			"orderby": "$project",
 			"return": [
-				"## {$project}",
+				"## fn:substring({$project},4)",
 					{
 						"for": "$i in $item",
 						"let": "$proj = $i@parent",
@@ -293,14 +293,23 @@
 		"Taskpaper Next Actions": {
 			"title": "\nNext Actions:",
 			"for": "$item in //@next and not @done",
-			"let": "$project = $item@parent", 
+			"let": "$project = $item@file", 
 			"orderby": "$project",
 			"groupby": "$project",
 			"return": [
-				"\t{$project}:",
+				"\tfn:substring({$project},4):",
 				{
 					"for": "$i in $item",
-					"return": "\t\t- {$i} {$i@tags} {$i@note}"
+					"let": "$proj = $i@parent",
+					"groupby": "$proj",
+					"return": [
+						"\t\t{$proj}:",
+						{
+							"for": "$j in $i",
+							"return": "\t\t\t- {$j} {$j@tags} {$j@note}"
+						},
+						""
+					]
 				},
 				""
 			]
