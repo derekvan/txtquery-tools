@@ -369,6 +369,19 @@
 				""
 			]
 		},
+		"Pomodoros": {
+			"title": "Daily Plan:",
+			"for": "$head in /* intersect //@pom/ancestor::*",
+			"let": "$lines = /{$head}//@pom and not @done",
+			"return": [
+				"{$head} fn:sum($lines@pom)p:",
+				{
+					"for": "$i in $lines",
+					"return": "\t- {$i} ({$i@pom}p)"
+				},
+				""
+			]
+		},
 		"Tagged lines - grouped by tags": {
 			"for": "$tag in fn:tagSet()",
 			"return": [
