@@ -370,11 +370,11 @@
 			]
 		},
 		"Pomodoros": {
-			"title": "Daily Plan:",
+			"title": "# Daily Plan:",
 			"for": "$head in /* intersect //@pom/ancestor::*",
 			"let": "$lines = /{$head}//@pom and not @done",
 			"return": [
-				"{$head} fn:sum($lines@pom)p:",
+				"# {$head} fn:sum($lines@pom)p:",
 				{
 					"for": "$i in $lines",
 					"return": "\t- {$i} ({$i@pom}p)"
