@@ -5,7 +5,7 @@
 # Written by Rob Trew 2014
 # https://github.com/RobTrew/txtquery-tools
 Title="txtQuery"
-Ver="0.31"
+Ver="0.25"
 DEPENDENCIES="TXTQuery.js, https://www.npmjs.org/package/foldingtext"
 
 # EDIT THIS LINE TO MATCH THE PATH OF The FoldingText CLI executable FT ON YOUR INSTALLATION
@@ -15,12 +15,6 @@ PathToFT=/usr/local/lib/node_modules/foldingtext/bin/ft
 if [[ ":$PATH:" != *":/usr/local/bin:"* ]]; then
 	export PATH=$PATH:/usr/local/bin 
 fi
-# Ensure that the locale is a UTF-8 setting
-if [[ $LC_CTYPE != *"UTF-8" ]]; then
-	export LC_ALL=$(defaults read -g AppleLocale).UTF-8 
-fi
-
-
 # ( install from https://www.npmjs.org/package/foldingtext )
 
 HelpString="NAME
@@ -315,17 +309,18 @@ function addFileOrFlagError () {
 			else fName="$1"; fi  # escape any double quotes for json
 			
 			# CONCATENATE ADDITIONAL FILE INTO WORKING SNOWBALL
-			cat "$1" >> "$2"
+			cat $1 >> $2
 			# ADD A 10 Byte FILE SEGMENTATION BREAK (for FT parsing)
-			printf "\n\n\n# ---\n\n" >> "$2"
+			printf "\n\n\n# ---\n\n" >> $2
 			
 			FileTriplets=("${FileTriplets[@]}" "\"$fName\"" $STARTPOSN $STARTLINE) # record starting position
 			
-			IFS=' ' read -ra STATS <<< $(wc -lm "$1") # get line count from wc
-			#IFS=' ' read -ra CHARCOUNT <<< $(wc -m "$1") # get line count from wc
+			IFS=' ' read -ra LINECOUNT <<< $(wc -l "$1") # get line count from wc
+			IFS=' ' read -ra CHARCOUNT <<< $(wc -m "$1") # get line count from wc
 
-			STARTPOSN=$(($STARTPOSN + ${STATS[1]} + 10)) #(see the segmentation
-			STARTLINE=$(($STARTLINE + ${STATS[0]} + 5)) #  break above ...)		#else
+			STARTPOSN=$(($STARTPOSN + $CHARCOUNT + 10)) #(see the segmentation
+			STARTLINE=$(($STARTLINE + $LINECOUNT + 5)) #  break above ...)
+		#else
 		#	isNotText=1
 		#	MSG="FILE TYPE APPEARS TO BE: \"$fType\" (as reported by BASH 'file -b' command)"
 		#fi
@@ -796,4 +791,4 @@ done
 		echo "$Title ver $Ver"
 		echo "FoldingText CLI ver."$($PathToFT -v)
 	fi
-	
+
