@@ -218,7 +218,7 @@
 		},
 		"Starting this week": {
 			"title": "\n# Starting",
-			"for": "$item in //(@start >= {today} and @start <= {tomorrow}) and not @done",
+			"for": "$item in //(@start >= {monday this week} and @start <= {saturday this week}) and not @done",
 			"let": "$day = fn:daypart($item@start)",
 			"groupby": "$day",
 			"orderby": "$day",
@@ -244,7 +244,7 @@
 		},
 		"Taskpaper Started": {
 			"title": "Starting:",
-			"for": "$item in //(@start >= {today} and @start <= {tomorrow}) and not @done",
+			"for": "$item in //(@start >= {monday this week} and @start <= {saturday this week}) and not @done",
 			"let": "$day = fn:daypart($item@start)",
 			"groupby": "$day",
 			"orderby": "$day",
